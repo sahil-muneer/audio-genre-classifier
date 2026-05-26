@@ -29,6 +29,29 @@ This project was trained on the standard **GTZAN Dataset**:
 ```bash
 git clone <your-repo-url>
 cd genre_classifier
+```
+
+**2. Install dependencies**
+Ensure you have Python 3 installed, then run:
+```bash
+pip install -r requirements.txt
+```
+
+**3. Firebase Configuration (Required for Live Analytics)**
+* Create a Firebase project and set up a Firestore Database.
+* Generate a new private key from your Firebase Service Account.
+* Rename the downloaded file to `firebase_key.json` and place it in the root directory.
+* **🚨 SECURITY NOTE:** `firebase_key.json` is heavily restricted. Ensure it is listed in your `.gitignore` before pushing any code.
+
+**4. Run the Server**
+```bash
+python app.py
+```
+*The application intentionally runs on **Port 5001** (`http://127.0.0.1:5001`) to prevent local port-forwarding conflicts and zombie processes during active development.*
+
+## 🛣️ Future Scalability Roadmap
+* **Global Cloud Deployment:** Transitioning the local Flask server to a headless REST API deployed on Render, with the frontend hosted globally via a CDN.
+* **IoT Hardware Integration:** Bypassing the browser upload by engineering an ESP32-CAM digital microphone node to stream live environmental audio directly to the API for real-time edge processing.
 
 ---
 **Developed by:** Sahil Muneer Nowsheri
