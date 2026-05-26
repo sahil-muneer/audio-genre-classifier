@@ -8,6 +8,7 @@ from sklearn.preprocessing import LabelEncoder
 # 1. Load the extracted features
 print("Loading data...")
 df = pd.read_csv("extracted_features.csv")
+print(f"Number of columns loaded: {len(df.columns)}")
 
 # 2. Separate features (X) and the answers/labels (y)
 X = df.drop("genre", axis=1) # All the math stuff
@@ -46,3 +47,11 @@ disp = ConfusionMatrixDisplay.from_estimator(
 plt.title("Genre Classification Confusion Matrix")
 plt.tight_layout()
 plt.show()
+
+import joblib
+
+# Save the trained model and the label encoder
+print("Saving model for web app...")
+joblib.dump(model, "saved_model.pkl")
+joblib.dump(encoder, "saved_encoder.pkl")
+print("Model saved successfully!")

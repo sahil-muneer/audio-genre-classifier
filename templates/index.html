@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Audio Analytics</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0f172a; color: white; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        
+        /* The Flexbox wrapper that holds both sides side-by-side */
+        .main-wrapper { display: flex; gap: 30px; width: 90%; max-width: 1200px; justify-content: center; }
+        
+        /* Shared styles for both panels */
+        .panel { background-color: #1e293b; padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); flex: 1; }
+        
+        /* Left Panel: Dashboard */
+        .left-panel { border-top: 5px solid #0ea5e9; display: flex; flex-direction: column; justify-content: center; align-items: center;}
+        .left-panel h1 { margin-top: 0; color: #0ea5e9; text-align: center; }
+        
+        /* Right Panel: Predictor */
+        .right-panel { border-top: 5px solid #11caa0; text-align: center; }
+        .right-panel h1 { margin-top: 0; color: #11caa0; }
+        
+        input[type="file"] { margin: 20px 0; padding: 10px; border: 1px dashed #475569; width: 90%; background: #0f172a; color: white; cursor: pointer; }
+        button { background-color: #11caa0; color: #0f172a; border: none; padding: 12px 24px; font-size: 16px; font-weight: bold; border-radius: 6px; cursor: pointer; transition: 0.2s; width: 100%; margin-top: 15px; }
+        button:hover { background-color: #0ea5e9; }
+        #result { margin-top: 20px; font-size: 24px; font-weight: bold; color: #f8fafc; background: #0f172a; padding: 15px; border-radius: 8px; }
+        audio { width: 100%; margin-top: 15px; display: none; border-radius: 6px; }
+    </style>
+</head>
+<body>
+
+    <div class="main-wrapper">
+        
+        <div class="panel left-panel">
+            <h1>📊 Live Database Analytics</h1>
+            <canvas id="genreChart" width="100%" height="80"></canvas>
+        </div>
+
+        <div class="panel right-panel">
+            <h1>🎵 AI Genre Classifier</h1>
+            <p>Upload a .wav file to predict its genre.</p>
+            
+            <form action="/predict" method="post" enctype="multipart/form-data">
+                <input type="file" name="audio_file" id="audioInput" accept=".wav" required>
+                <audio id="audioPreview" controls></audio>
+                <button type="submit">Predict Genre</button>
+            </form>
+
+            {% if prediction %}
+                <div id="result">Predicted Genre:<br><span style="color: #11caa0;">{{ prediction }}</span></div>
+                
+                <div style="margin-top: 15px; text-align: left;">
+                    <p style="font-size: 14px; color: #94a3b8; margin-bottom: 5px;">Mel-Spectrogram (Audio Math):</p>
+                    <img src="/static/spectrogram.png?t={{ timestamp }}" alt="Audio Spectrogram" style="width: 100%; border-radius: 6px; border: 1px solid #475569;">
+                </div>
+            {% endif %}
+        </div>
+
+    </div>
+
+    <script>
+        document.getElementById('audioInput').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const audioPlayer = document.getElementById('audioPreview');
+                const fileURL = URL.createObjectURL(file);
+                audioPlayer.src = fileURL;
+                audioPlayer.style.display = 'block'; 
+            }
+        });
+    </script>
+
+    <script>
+        const rawData = {{ data | tojson | safe }};
+        const labels = Object.keys(rawData);
+        const counts = Object.values(rawData);
+
+        const ctx = document.getElementById('genreChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Total Predictions',
+                    data: counts,
+                    backgroundColor: ['rgba(17, 202, 160, 0.7)', 'rgba(14, 165, 233, 0.7)', 'rgba(168, 85, 247, 0.7)', 'rgba(244, 63, 94, 0.7)'],
+                    borderColor: ['rgba(17, 202, 160, 1)', 'rgba(14, 165, 233, 1)', 'rgba(168, 85, 247, 1)', 'rgba(244, 63, 94, 1)'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: { beginAtZero: true, ticks: { color: 'white', stepSize: 1 } },
+                    x: { ticks: { color: 'white' } }
+                },
+                plugins: { legend: { labels: { color: 'white' } } }
+            }
+        });
+    </script>
+</body>
+</html>
